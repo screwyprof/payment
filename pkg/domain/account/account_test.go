@@ -12,6 +12,8 @@ import (
 )
 
 func TestCreateEmpty_MethodCalled_ShouldReturnNewInstance(t *testing.T) {
+	t.Parallel()
+
 	// act
 	acc := CreateEmpty()
 
@@ -20,6 +22,8 @@ func TestCreateEmpty_MethodCalled_ShouldReturnNewInstance(t *testing.T) {
 }
 
 func TestAccountOpenAccount_Method_Called_ValidEventReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := CreateEmpty()
 
@@ -40,6 +44,8 @@ func TestAccountOpenAccount_Method_Called_ValidEventReturned(t *testing.T) {
 }
 
 func TestAccountDeposit_ValidAmountGiven_ValidEventReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -61,6 +67,8 @@ func TestAccountDeposit_ValidAmountGiven_ValidEventReturned(t *testing.T) {
 }
 
 func TestAccountDeposit_AmountInADifferentCurrentGiven_ErrorReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -75,6 +83,8 @@ func TestAccountDeposit_AmountInADifferentCurrentGiven_ErrorReturned(t *testing.
 }
 
 func TestAccountSendTransferTo_ValidParamsGiven_ValidEventReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -97,6 +107,8 @@ func TestAccountSendTransferTo_ValidParamsGiven_ValidEventReturned(t *testing.T)
 }
 
 func TestAccountSendTransferTo_SendingTransferToTheSameAccount_ErrorReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -111,6 +123,8 @@ func TestAccountSendTransferTo_SendingTransferToTheSameAccount_ErrorReturned(t *
 }
 
 func TestAccountSendTransferTo_BalanceIsNotHighEnough_ErrorReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -125,6 +139,8 @@ func TestAccountSendTransferTo_BalanceIsNotHighEnough_ErrorReturned(t *testing.T
 }
 
 func TestAccountSendTransferTo_AmountInADifferentCurrentGiven_ErrorReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -139,6 +155,8 @@ func TestAccountSendTransferTo_AmountInADifferentCurrentGiven_ErrorReturned(t *t
 }
 
 func TestAccountReceiveMoneyFrom_SendingTransferToTheSameAccount_ErrorReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -167,6 +185,8 @@ func TestAccountReceiveMoneyFrom_AmountInADifferentCurrentGiven_ErrorReturned(t 
 }
 
 func TestAccountReceiveMoneyFrom_ValidParamsGiven_ValidEventReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
@@ -189,6 +209,8 @@ func TestAccountReceiveMoneyFrom_ValidParamsGiven_ValidEventReturned(t *testing.
 }
 
 func TestAccountToString_MethodCalled_ValidStringReturned(t *testing.T) {
+	t.Parallel()
+
 	// arrange
 	acc := &Account{
 		Number:  Number("123"),
