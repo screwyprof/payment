@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccountOpened_EventIDt(t *testing.T) {
+func TestAccountOpened_EventID(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "AccountOpened", AccountOpened{}.EventID())
 }
