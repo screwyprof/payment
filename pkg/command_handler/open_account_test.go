@@ -3,8 +3,6 @@ package command_handler
 import (
 	"context"
 	"fmt"
-	"github.com/screwyprof/payment/internal/pkg/observer"
-	"github.com/screwyprof/payment/pkg/event"
 	"testing"
 
 	"github.com/rhymond/go-money"
@@ -13,8 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/screwyprof/payment/internal/pkg/cqrs"
+	"github.com/screwyprof/payment/internal/pkg/observer"
 
 	"github.com/screwyprof/payment/pkg/command"
+	"github.com/screwyprof/payment/pkg/event"
 )
 
 type eventStoreStub struct {
