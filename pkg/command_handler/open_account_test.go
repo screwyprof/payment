@@ -10,34 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
-	"github.com/screwyprof/payment/internal/pkg/observer"
-
 	"github.com/screwyprof/payment/pkg/command"
 	"github.com/screwyprof/payment/pkg/event"
 )
-
-type eventStoreStub struct {
-	Event cqrs.Event
-	Error error
-}
-
-func (m *eventStoreStub) StoreEvent(event cqrs.Event) error {
-	m.Event = event
-	if m.Error != nil {
-		return m.Error
-	}
-	return nil
-}
-
-type notifierStub struct {
-	observer.Notifier
-	Event observer.Event
-}
-
-func (n *notifierStub) Notify(event observer.Event) {
-	n.Event = event
-}
 
 func TestOpenAccountHandle_InvalidCommandGiven_ErrorReturned(t *testing.T) {
 	t.Parallel()
@@ -59,7 +34,6 @@ func TestOpenAccountHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T) {
 	expected := fmt.Errorf("an error occurred")
 	eventStore := &eventStoreStub{}
 	eventStore.Error = expected
-	//eventStore.On("StoreEvent", mock.Anything).Return(expected)
 
 	h := NewOpenAccount(eventStore, nil)
 
@@ -67,7 +41,6 @@ func TestOpenAccountHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T) {
 	err := h.Handle(context.Background(), command.OpenAccount{})
 
 	// assert
-	//eventStore.AssertExpectations(t)
 	assert.EqualError(t, err, "cannot open account: an error occurred")
 }
 
@@ -80,8 +53,6 @@ func TestOpenAccountHandle_ValidCommandGiven_AccountOpened(t *testing.T) {
 	}
 
 	eventStore := &eventStoreStub{}
-	//eventStore.On("StoreEvent", mock.Anything).Return(nil)
-
 	notifier := &notifierStub{}
 	h := NewOpenAccount(eventStore, notifier)
 
