@@ -16,6 +16,11 @@ func TestTransferMoney_CommandID(t *testing.T) {
 	assert.Equal(t, "TransferMoney", TransferMoney{}.CommandID())
 }
 
+func TestReceiveMoney_CommandID(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "ReceiveMoney", ReceiveMoney{}.CommandID())
+}
+
 func TestUnknown_CommandID(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "Unknown", Unknown{}.CommandID())
