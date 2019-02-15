@@ -5,5 +5,5 @@ type GetAccountByNumber interface {
 }
 
 type AccountUpdater interface {
-	Update(account Account) error
+	Update(account *Account) error
 }

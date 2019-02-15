@@ -29,7 +29,7 @@ func (h *OpenAccount) Handle(ctx context.Context, c cqrs.Command) error {
 		return fmt.Errorf("invalid command %+#v given", c)
 	}
 
-	accountOpened := account.CreateEmpty().OpenAccount(cmd.Balance)
+	accountOpened := account.CreateEmpty().OpenAccount(cmd.Number, cmd.Balance)
 	if err := h.eventStore.StoreEvent(accountOpened); err != nil {
 		return fmt.Errorf("cannot open account: %v", err)
 	}

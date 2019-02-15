@@ -13,12 +13,10 @@ import (
 // Number A unique account ID.
 type Number string
 
-// generateAccNumber Generates a random Account number.
-func generateAccNumber() Number {
+// GenerateAccNumber Generates a random Account number.
+func GenerateAccNumber() Number {
 	return Number(strconv.Itoa(int(time.Now().UnixNano())))
 }
-
-var numberGenerator = generateAccNumber
 
 // Account An Account representation.
 type Account struct {
@@ -32,8 +30,8 @@ func CreateEmpty() *Account {
 }
 
 // OpenAccount Opens a new account with optional starting balance.
-func (a *Account) OpenAccount(balance money.Money) event.AccountOpened {
-	a.Number = numberGenerator()
+func (a *Account) OpenAccount(number Number, balance money.Money) event.AccountOpened {
+	a.Number = number
 	a.Balance = balance
 
 	return event.AccountOpened{

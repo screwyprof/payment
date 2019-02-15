@@ -27,17 +27,13 @@ func TestAccountOpenAccount_Method_Called_ValidEventReturned(t *testing.T) {
 	// arrange
 	acc := CreateEmpty()
 
-	numberGenerator = func() Number {
-		return Number("123")
-	}
-
 	expected := event.AccountOpened{
 		Number:  "123",
 		Balance: *money.New(10000, "USD"),
 	}
 
 	// act
-	obtained := acc.OpenAccount(*money.New(10000, "USD"))
+	obtained := acc.OpenAccount(Number("123"), *money.New(10000, "USD"))
 
 	// assert
 	assert.Equal(t, expected, obtained)
