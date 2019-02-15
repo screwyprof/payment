@@ -14,18 +14,18 @@ import (
 // TransferMoney Transfers Money from an Account to another Account.
 type TransferMoney struct {
 	accountProvider account.GetAccountByNumber
-	eventStore      account.EventStore
+	store           account.AccountStorage
 	notifier        observer.Notifier
 }
 
 // NewTransferMoney Creates a new instance of TransferMoney.
 func NewTransferMoney(
 	accountProvider account.GetAccountByNumber,
-	eventStore account.EventStore,
+	store account.AccountStorage,
 	notifier observer.Notifier) cqrs.CommandHandler {
 	return &TransferMoney{
 		accountProvider: accountProvider,
-		eventStore:      eventStore,
+		store:           store,
 		notifier:        notifier,
 	}
 }
@@ -47,7 +47,7 @@ func (h *TransferMoney) Handle(ctx context.Context, c cqrs.Command) error {
 		return fmt.Errorf("cannot transfer money from %s to %s: %v", cmd.From, cmd.To, err)
 	}
 
-	if err := h.eventStore.StoreEvent(moneyTransferred); err != nil {
+	if err := h.store.Add(fromAcc); err != nil {
 		return fmt.Errorf("cannot transfer money from %s to %s: %v", cmd.From, cmd.To, err)
 	}
 

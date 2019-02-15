@@ -1,7 +1,6 @@
 package command_handler
 
 import (
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/observer"
 
 	"github.com/screwyprof/payment/pkg/domain/account"
@@ -12,23 +11,24 @@ type accountProviderStub struct {
 	ReturnedAccount *account.Account
 }
 
-func (m accountProviderStub) ByNumber(number account.Number) (*account.Account, error) {
-	if m.ReturnedError != nil {
-		return &account.Account{}, m.ReturnedError
+func (s accountProviderStub) ByNumber(number account.Number) (*account.Account, error) {
+	if s.ReturnedError != nil {
+		return &account.Account{}, s.ReturnedError
 	}
-	return m.ReturnedAccount, nil
+	return s.ReturnedAccount, nil
 }
 
-type eventStoreStub struct {
-	Event cqrs.Event
-	Error error
+type accountStorageStub struct {
+	ReturnedError error
+	AddedAccount  *account.Account
 }
 
-func (m *eventStoreStub) StoreEvent(event cqrs.Event) error {
-	m.Event = event
-	if m.Error != nil {
-		return m.Error
+func (s *accountStorageStub) Add(acc *account.Account) error {
+	if s.ReturnedError != nil {
+		return s.ReturnedError
 	}
+
+	s.AddedAccount = acc
 	return nil
 }
 

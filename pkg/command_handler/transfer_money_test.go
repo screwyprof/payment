@@ -78,10 +78,9 @@ func TestTransferMoneyHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T)
 	}
 
 	expected := fmt.Errorf("an error occurred")
-	eventStore := &eventStoreStub{}
-	eventStore.Error = expected
+	store := &accountStorageStub{ReturnedError: expected}
 
-	h := NewTransferMoney(accountProvider, eventStore, nil)
+	h := NewTransferMoney(accountProvider, store, nil)
 
 	// act
 	err := h.Handle(context.Background(), command.TransferMoney{
@@ -98,6 +97,11 @@ func TestTransferMoneyHandle_ValidCommandGiven_MoneyTransferred(t *testing.T) {
 	t.Parallel()
 
 	// arrange
+	expectedAccount := &account.Account{
+		Number:  account.Number("123"),
+		Balance: *money.New(9000, "USD"),
+	}
+
 	expectedEvent := event.MoneyTransferred{
 		From:    "123",
 		To:      "321",
@@ -112,9 +116,9 @@ func TestTransferMoneyHandle_ValidCommandGiven_MoneyTransferred(t *testing.T) {
 		},
 	}
 
-	eventStore := &eventStoreStub{}
+	store := &accountStorageStub{}
 	notifier := &notifierStub{}
-	h := NewTransferMoney(accountProvider, eventStore, notifier)
+	h := NewTransferMoney(accountProvider, store, notifier)
 
 	// act
 	err := h.Handle(context.Background(), command.TransferMoney{
@@ -126,8 +130,7 @@ func TestTransferMoneyHandle_ValidCommandGiven_MoneyTransferred(t *testing.T) {
 
 	// assert
 	e := notifier.Event.(event.MoneyTransferred)
-	ev := eventStore.Event.(event.MoneyTransferred)
 
-	assert.Equal(t, expectedEvent.Balance, ev.Balance)
+	assert.Equal(t, expectedAccount, store.AddedAccount)
 	assert.Equal(t, expectedEvent.Balance, e.Balance)
 }

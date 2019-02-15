@@ -13,9 +13,9 @@ import (
 // Number A unique account ID.
 type Number string
 
-// GenerateAccNumber Generates a random Account number.
-func GenerateAccNumber() Number {
-	return Number(strconv.Itoa(int(time.Now().UnixNano())))
+// GenerateNumber Generates a random Account number.
+func GenerateNumber() Number {
+	return Number("ACC" + strconv.Itoa(int(time.Now().UnixNano())))
 }
 
 // Account An Account representation.

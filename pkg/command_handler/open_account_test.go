@@ -3,6 +3,7 @@ package command_handler
 import (
 	"context"
 	"fmt"
+	"github.com/screwyprof/payment/pkg/domain/account"
 	"testing"
 
 	"github.com/rhymond/go-money"
@@ -32,10 +33,10 @@ func TestOpenAccountHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T) {
 
 	// arrange
 	expected := fmt.Errorf("an error occurred")
-	eventStore := &eventStoreStub{}
-	eventStore.Error = expected
+	store := &accountStorageStub{}
+	store.ReturnedError = expected
 
-	h := NewOpenAccount(eventStore, nil)
+	h := NewOpenAccount(store, nil)
 
 	// act
 	err := h.Handle(context.Background(), command.OpenAccount{})
@@ -48,22 +49,30 @@ func TestOpenAccountHandle_ValidCommandGiven_AccountOpened(t *testing.T) {
 	t.Parallel()
 
 	// arrange
-	expectedEvent := event.AccountOpened{
-		Balance: *money.New(10000, "USD"),
+	expectedNumber := account.Number("777")
+	expectedBalance := *money.New(10000, "USD")
+
+	expectedAccount := &account.Account{
+		Number:  expectedNumber,
+		Balance: expectedBalance,
 	}
 
-	eventStore := &eventStoreStub{}
+	expectedEvent := event.AccountOpened{
+		Number:  string(expectedNumber),
+		Balance: expectedBalance,
+	}
+
+	store := &accountStorageStub{}
 	notifier := &notifierStub{}
-	h := NewOpenAccount(eventStore, notifier)
+	h := NewOpenAccount(store, notifier)
 
 	// act
-	err := h.Handle(context.Background(), command.OpenAccount{Balance: *money.New(10000, "USD")})
+	err := h.Handle(context.Background(), command.OpenAccount{Number: expectedNumber, Balance: expectedBalance})
 	require.NoError(t, err)
 
 	// assert
 	e := notifier.Event.(event.AccountOpened)
-	ev := eventStore.Event.(event.AccountOpened)
 
-	assert.Equal(t, expectedEvent.Balance, ev.Balance)
+	assert.Equal(t, expectedAccount, store.AddedAccount)
 	assert.Equal(t, expectedEvent.Balance, e.Balance)
 }

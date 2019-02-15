@@ -33,11 +33,9 @@ func TestReceiveMoneyHandle_AccountProviderErrorOccurred_ErrorReturned(t *testin
 
 	// arrange
 	expected := fmt.Errorf("an error occurred")
-	accountProvider := accountProviderStub{
-		ReturnedError: expected,
-	}
+	store := &accountProviderStub{ReturnedError: expected}
 
-	h := NewReceiveMoney(accountProvider, nil, nil)
+	h := NewReceiveMoney(store, nil, nil)
 
 	// act
 	err := h.Handle(context.Background(), command.ReceiveMoney{From: account.Number("123"), To: account.Number("321")})
@@ -50,7 +48,7 @@ func TestReceiveMoneyHandle_ReceiveToTheSameAccountErrorOccurred_ErrorReturned(t
 	t.Parallel()
 
 	// arrange
-	accountProvider := accountProviderStub{
+	accountProvider := &accountProviderStub{
 		ReturnedAccount: &account.Account{
 			Number: account.Number("123"),
 		},
@@ -66,7 +64,7 @@ func TestReceiveMoneyHandle_ReceiveToTheSameAccountErrorOccurred_ErrorReturned(t
 		"cannot receive money from 123 to 123: cannot transfer money to the same account: 123")
 }
 
-func TestReceiveMoneyHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T) {
+func TestReceiveMoneyHandle_AccountStoreErrorOccurred_ErrorReturned(t *testing.T) {
 	t.Parallel()
 
 	// arrange
@@ -78,10 +76,9 @@ func TestReceiveMoneyHandle_EventStoreErrorOccurred_ErrorReturned(t *testing.T) 
 	}
 
 	expected := fmt.Errorf("an error occurred")
-	eventStore := &eventStoreStub{}
-	eventStore.Error = expected
+	store := &accountStorageStub{ReturnedError: expected}
 
-	h := NewReceiveMoney(accountProvider, eventStore, nil)
+	h := NewReceiveMoney(accountProvider, store, nil)
 
 	// act
 	err := h.Handle(context.Background(), command.ReceiveMoney{
@@ -98,6 +95,11 @@ func TestReceiveMoneyHandle_ValidCommandGiven_MoneyReceived(t *testing.T) {
 	t.Parallel()
 
 	// arrange
+	expectedAccount := &account.Account{
+		Number:  account.Number("321"),
+		Balance: *money.New(11000, "USD"),
+	}
+
 	expectedEvent := event.MoneyReceived{
 		From:    "123",
 		To:      "321",
@@ -112,9 +114,9 @@ func TestReceiveMoneyHandle_ValidCommandGiven_MoneyReceived(t *testing.T) {
 		},
 	}
 
-	eventStore := &eventStoreStub{}
+	store := &accountStorageStub{}
 	notifier := &notifierStub{}
-	h := NewReceiveMoney(accountProvider, eventStore, notifier)
+	h := NewReceiveMoney(accountProvider, store, notifier)
 
 	// act
 	err := h.Handle(context.Background(), command.ReceiveMoney{
@@ -126,8 +128,7 @@ func TestReceiveMoneyHandle_ValidCommandGiven_MoneyReceived(t *testing.T) {
 
 	// assert
 	e := notifier.Event.(event.MoneyReceived)
-	ev := eventStore.Event.(event.MoneyReceived)
 
-	assert.Equal(t, expectedEvent.Balance, ev.Balance)
+	assert.Equal(t, expectedAccount, store.AddedAccount)
 	assert.Equal(t, expectedEvent.Balance, e.Balance)
 }

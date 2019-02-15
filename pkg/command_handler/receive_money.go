@@ -14,18 +14,18 @@ import (
 // ReceiveMoney Receives Money to the given another Account.
 type ReceiveMoney struct {
 	accountProvider account.GetAccountByNumber
-	eventStore      account.EventStore
+	store           account.AccountStorage
 	notifier        observer.Notifier
 }
 
 // NewReceiveMoney Creates a new instance of ReceiveMoney.
 func NewReceiveMoney(
 	accountProvider account.GetAccountByNumber,
-	eventStore account.EventStore,
+	store account.AccountStorage,
 	notifier observer.Notifier) cqrs.CommandHandler {
 	return &ReceiveMoney{
 		accountProvider: accountProvider,
-		eventStore:      eventStore,
+		store:           store,
 		notifier:        notifier,
 	}
 }
@@ -47,7 +47,7 @@ func (h *ReceiveMoney) Handle(ctx context.Context, c cqrs.Command) error {
 		return fmt.Errorf("cannot receive money from %s to %s: %v", cmd.From, cmd.To, err)
 	}
 
-	if err := h.eventStore.StoreEvent(moneyReceived); err != nil {
+	if err := h.store.Add(acc); err != nil {
 		return fmt.Errorf("cannot receive money from %s to %s: %v", cmd.From, cmd.To, err)
 	}
 

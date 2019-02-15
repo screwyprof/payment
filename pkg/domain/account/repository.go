@@ -1,11 +1,13 @@
 package account
 
-import "github.com/screwyprof/payment/internal/pkg/cqrs"
-
 type GetAccountByNumber interface {
 	ByNumber(number Number) (*Account, error)
 }
 
-type EventStore interface {
-	StoreEvent(event cqrs.Event) error
+type AccountStorage interface {
+	Add(acc *Account) error
 }
+
+//type EventStore interface {
+//	StoreEvent(e cqrs.Event)
+//}

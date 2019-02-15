@@ -13,13 +13,13 @@ import (
 
 // OpenAccount Opens an account.
 type OpenAccount struct {
-	eventStore account.EventStore
-	notifier   observer.Notifier
+	store    account.AccountStorage
+	notifier observer.Notifier
 }
 
 // NewOpenAccount Creates a new instance of OpenAccount.
-func NewOpenAccount(eventStore account.EventStore, notifier observer.Notifier) cqrs.CommandHandler {
-	return &OpenAccount{eventStore: eventStore, notifier: notifier}
+func NewOpenAccount(eventStore account.AccountStorage, notifier observer.Notifier) cqrs.CommandHandler {
+	return &OpenAccount{store: eventStore, notifier: notifier}
 }
 
 // Handle Opens an account.
@@ -29,8 +29,9 @@ func (h *OpenAccount) Handle(ctx context.Context, c cqrs.Command) error {
 		return fmt.Errorf("invalid command %+#v given", c)
 	}
 
-	accountOpened := account.CreateEmpty().OpenAccount(cmd.Number, cmd.Balance)
-	if err := h.eventStore.StoreEvent(accountOpened); err != nil {
+	acc := account.CreateEmpty()
+	accountOpened := acc.OpenAccount(cmd.Number, cmd.Balance)
+	if err := h.store.Add(acc); err != nil {
 		return fmt.Errorf("cannot open account: %v", err)
 	}
 
