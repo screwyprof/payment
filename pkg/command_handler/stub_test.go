@@ -19,7 +19,6 @@ func (m accountProviderStub) ByNumber(number account.Number) (*account.Account, 
 	return m.ReturnedAccount, nil
 }
 
-
 type eventStoreStub struct {
 	Event cqrs.Event
 	Error error

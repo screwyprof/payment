@@ -3,8 +3,8 @@ package command_handler
 import (
 	"context"
 	"fmt"
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
 
+	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/observer"
 
 	"github.com/screwyprof/payment/pkg/command"
@@ -23,7 +23,6 @@ func NewTransferMoney(
 	accountProvider account.GetAccountByNumber,
 	eventStore account.EventStore,
 	notifier observer.Notifier) cqrs.CommandHandler {
-
 	return &TransferMoney{
 		accountProvider: accountProvider,
 		eventStore:      eventStore,
