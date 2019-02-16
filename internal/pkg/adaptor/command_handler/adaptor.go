@@ -21,8 +21,8 @@ func (a domainAdaptor) Handle(ctx context.Context, c cqrs.Command) error {
 }
 
 // FromDomain makes usecase.CommandHandler compatible with infra.CommandHandler.
-func FromDomain(i cqrs.CommandHandler) bus.CommandHandler {
-	return infraAdapter{i: i}
+func FromDomain(h cqrs.CommandHandler) bus.CommandHandler {
+	return infraAdapter{h: h}
 }
 
 type infraAdapter struct {
