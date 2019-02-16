@@ -107,6 +107,14 @@ func queryAccount(queryBus cqrs.QueryHandler, number string) {
 	err := queryBus.Handle(context.Background(), query.GetAccountShortInfo{Number: number}, acc)
 	failOnError(err)
 	fmt.Println(acc.ToString())
+
+	if len(acc.Ledgers) < 1 {
+		return
+	}
+	fmt.Println("Ledgers:")
+	for idx, ledger := range acc.Ledgers {
+		fmt.Printf("#%d. %s\n", idx+1, ledger.ToString())
+	}
 }
 
 func failOnError(err error) {

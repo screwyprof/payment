@@ -24,5 +24,15 @@ func (h *AccountOpened) Handle(e observer.Event) {
 	}
 
 	//fmt.Printf("AccountOpenedEventHandler: %s = %s\n", evn.Number, evn.Balance.Display())
-	h.accountReporter.Update(&report.Account{Number: string(evn.Number), Balance: evn.Balance})
+	rep := &report.Account{
+		Number:  string(evn.Number),
+		Balance: evn.Balance,
+		Ledgers: []report.Ledger{
+			{
+				Action: "Deposit",
+				Amount: evn.Balance,
+			},
+		},
+	}
+	h.accountReporter.Update(rep)
 }

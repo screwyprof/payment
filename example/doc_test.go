@@ -63,15 +63,17 @@ func Example() {
 
 	// Output:
 	// WriteSide: saving account ACC500 = $500.00
-	// ReadSide: updating account ACC500 with balance $500.00
 	// WriteSide: saving account ACC300 = $300.00
-	// ReadSide: updating account ACC300 with balance $300.00
 	// ReadSide: retreiving account ACC500
 	// ReadSide: account ACC500 retrieved with balance $500.00
 	// #ACC500: $500.00
+	// Ledgers:
+	// #1. Deposit, $500.00
 	// ReadSide: retreiving account ACC300
 	// ReadSide: account ACC300 retrieved with balance $300.00
 	// #ACC300: $300.00
+	// Ledgers:
+	// #1. Deposit, $300.00
 	// WriteSide: retrieving account ACC500
 	// WriteSide: account ACC500 retrieved with balance $500.00
 	// WriteSide: saving account ACC500 = $200.00
@@ -83,9 +85,16 @@ func Example() {
 	// ReadSide: retreiving account ACC500
 	// ReadSide: account ACC500 retrieved with balance $200.00
 	// #ACC500: $200.00
+	// Ledgers:
+	// #1. Deposit, $500.00
+	// #2. Transfer to ACC300, $300.00
 	// ReadSide: retreiving account ACC300
 	// ReadSide: account ACC300 retrieved with balance $600.00
 	// #ACC300: $600.00
+	// Ledgers:
+	// #1. Deposit, $300.00
+	// #2. Transfer from ACC500, $300.00
+
 }
 
 func newCommandBus(moneyTransfer, moneyReceiver, accountOpenner cqrs.CommandHandler) cqrs.CommandHandler {
@@ -133,6 +142,14 @@ func queryAccount(queryBus cqrs.QueryHandler, number string) {
 	err := queryBus.Handle(context.Background(), query.GetAccountShortInfo{Number: number}, acc)
 	failOnError(err)
 	fmt.Println(acc.ToString())
+
+	if len(acc.Ledgers) < 1 {
+		return
+	}
+	fmt.Println("Ledgers:")
+	for idx, ledger := range acc.Ledgers {
+		fmt.Printf("#%d. %s\n", idx+1, ledger.ToString())
+	}
 }
 
 func failOnError(err error) {

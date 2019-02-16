@@ -29,7 +29,19 @@ func (r *InMemoryAccountReporter) ByNumber(number string) (*report.Account, erro
 }
 
 func (r *InMemoryAccountReporter) Update(acc *report.Account) error {
-	r.accounts[acc.Number] = acc
+	// add new account report
+	current, ok := r.accounts[acc.Number]
+	if !ok {
+		r.accounts[acc.Number] = acc
+		return nil
+	}
+
+	// update report
+	current.Number = acc.Number
+	current.Balance = acc.Balance
+	current.Ledgers = append(current.Ledgers, acc.Ledgers...)
+
+	r.accounts[acc.Number] = current
 
 	fmt.Printf("ReadSide: updating account %s with balance %s\n", acc.Number, acc.Balance.Display())
 	return nil

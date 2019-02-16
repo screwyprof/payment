@@ -10,6 +10,7 @@ import (
 type Account struct {
 	Number  string
 	Balance money.Money
+	Ledgers []Ledger
 }
 
 // ToString Renders the Account as a string.

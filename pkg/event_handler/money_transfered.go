@@ -1,6 +1,8 @@
 package event_handler
 
 import (
+	"fmt"
+
 	"github.com/screwyprof/payment/internal/pkg/observer"
 	"github.com/screwyprof/payment/pkg/event"
 	"github.com/screwyprof/payment/pkg/report"
@@ -23,5 +25,17 @@ func (h *MoneyTransferred) Handle(e observer.Event) {
 	}
 	//fmt.Printf("MoneyTransferedEventHandler: %s=%s, %s => %s\n",
 	//	evn.From, evn.Balance.Display(), evn.Amount.Display(), evn.To)
-	h.accountReporter.Update(&report.Account{Number: string(evn.From), Balance: evn.Balance})
+
+	rep := &report.Account{
+		Number:  evn.From,
+		Balance: evn.Balance,
+		Ledgers: []report.Ledger{
+			{
+				Action: fmt.Sprintf("Transfer to %s", evn.To),
+				Amount: evn.Amount,
+			},
+		},
+	}
+
+	h.accountReporter.Update(rep)
 }
