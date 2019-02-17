@@ -1,0 +1,199 @@
+basePath: /api/v1
+definitions:
+  controller.Message:
+    properties:
+      message:
+        example: message
+        type: string
+    type: object
+  request.OpenAccount:
+    properties:
+      amount:
+        example: 77700
+        type: integer
+      currency:
+        example: USD
+        type: string
+      number:
+        example: ACC777
+        type: string
+    type: object
+  request.TransferMoney:
+    properties:
+      amount:
+        example: 10000
+        type: integer
+      currency:
+        example: USD
+        type: string
+      to:
+        example: ACC555
+        type: string
+    type: object
+  responder.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+  response.AccountInfo:
+    properties:
+      balance:
+        example: $100.00
+        type: string
+      ledgers:
+        items:
+          $ref: '#/definitions/response.Ledger'
+        type: array
+      number:
+        example: ACC777
+        type: string
+    type: object
+  response.Ledger:
+    properties:
+      action:
+        example: Transfer from AK777, $100
+        type: string
+    type: object
+  response.ShortAccountInfo:
+    properties:
+      balance:
+        example: $100.00
+        type: string
+      number:
+        example: ACC777
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample Payment service.
+  license:
+    name: Apache 2.0
+    url: https://github.com/screwyprof/s
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /accounts:
+    post:
+      consumes:
+      - application/json
+      description: Open a new account with optional balance
+      parameters:
+      - description: Open account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/request.OpenAccount'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ShortAccountInfo'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+      summary: Open a new account
+      tags:
+      - accounts
+  /accounts/{number}:
+    get:
+      consumes:
+      - application/json
+      description: Show account info by number
+      parameters:
+      - description: account number
+        in: path
+        name: number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AccountInfo'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+      summary: Show an account
+      tags:
+      - accounts
+  /accounts/{number}/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Transfer money from an account to another account
+      parameters:
+      - description: account number
+        in: path
+        name: number
+        required: true
+        type: string
+      - description: Transfer money
+        in: body
+        name: transfer
+        required: true
+        schema:
+          $ref: '#/definitions/request.TransferMoney'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.Message'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+      summary: Transfer money from an account to another account
+      tags:
+      - accounts
+swagger: "2.0"
