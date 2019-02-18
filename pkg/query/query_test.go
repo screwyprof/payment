@@ -11,6 +11,11 @@ func TestGetAccountShortInfo_QueryID(t *testing.T) {
 	assert.Equal(t, "GetAccountShortInfo", GetAccountShortInfo{}.QueryID())
 }
 
+func TestGetAllAccounts_QueryID(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "GetAllAccounts", GetAllAccounts{}.QueryID())
+}
+
 func TestUnknown_QueryID(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, "Unknown", Unknown{}.QueryID())

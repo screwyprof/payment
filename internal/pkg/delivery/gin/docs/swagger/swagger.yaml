@@ -52,6 +52,12 @@ definitions:
         example: ACC777
         type: string
     type: object
+  response.AvailableAccount:
+    properties:
+      number:
+        example: ACC777
+        type: string
+    type: object
   response.Ledger:
     properties:
       action:
@@ -82,6 +88,37 @@ info:
   version: "1.0"
 paths:
   /accounts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves available accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.AvailableAccount'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responder.HTTPError'
+            type: object
+      summary: Retrieves available accounts
+      tags:
+      - accounts
     post:
       consumes:
       - application/json

@@ -28,6 +28,15 @@ func (r *InMemoryAccountReporter) ByNumber(number string) (*report.Account, erro
 	return acc, nil
 }
 
+func (r *InMemoryAccountReporter) All() (report.Accounts, error) {
+	var accs []*report.Account
+	for _, acc := range r.accounts {
+		accs = append(accs, acc)
+	}
+
+	return accs, nil
+}
+
 func (r *InMemoryAccountReporter) Update(acc *report.Account) error {
 	// add new account report
 	current, ok := r.accounts[acc.Number]

@@ -14,18 +14,6 @@ import (
 	"github.com/screwyprof/payment/pkg/report"
 )
 
-type accountProviderStub struct {
-	ReturnedError   error
-	ReturnedAccount *report.Account
-}
-
-func (m accountProviderStub) ByNumber(number string) (*report.Account, error) {
-	if m.ReturnedError != nil {
-		return &report.Account{}, m.ReturnedError
-	}
-	return m.ReturnedAccount, nil
-}
-
 func TestGetAccountShortInfoHandle_InvalidQueryGiven_ErrorReturned(t *testing.T) {
 	t.Parallel()
 

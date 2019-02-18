@@ -51,11 +51,13 @@ func main() {
 	commandBus := newCommandBus(moneyTransfer, moneyReceiver, accountOpenner)
 
 	accountQueryer := query_handler.NewGetAccountShortInfo(accountReporter)
-	queryBus := newQueryBus(accountQueryer)
+	accountsQueryer := query_handler.NewGetAllAccounts(accountReporter)
+	queryBus := newQueryBus(accountQueryer, accountsQueryer)
 
 	openAccountCtrl := controller.NewOpenAccount(commandBus, queryBus)
 	showAccountCtrl := controller.NewShowAccount(queryBus)
 	transferMoneyCtrl := controller.NewTransferMoney(commandBus, queryBus)
+	showAvailableAccountsCtrl := controller.NewShowAvailableAccounts(queryBus)
 
 	// init router
 	r := gin.Default()
@@ -65,7 +67,7 @@ func main() {
 		accounts := v1.Group("/accounts")
 		{
 			accounts.GET(":number", showAccountCtrl.Handle)
-			//accounts.GET("", c.ListAccounts)
+			accounts.GET("", showAvailableAccountsCtrl.Handle)
 			accounts.POST("", openAccountCtrl.Handle)
 			accounts.POST(":number/transfer", transferMoneyCtrl.Handle)
 		}
@@ -96,9 +98,10 @@ func newCommandBus(moneyTransfer, moneyReceiver, accountOpenner cqrs.CommandHand
 	return cmdadaptor.ToDomain(commandBus)
 }
 
-func newQueryBus(accountQueryer cqrs.QueryHandler) cqrs.QueryHandler {
+func newQueryBus(accountQueryer cqrs.QueryHandler, accountsQueryer cqrs.QueryHandler) cqrs.QueryHandler {
 	queryBus := bus.NewQueryHandlerBus()
 	queryBus.Register("GetAccountShortInfo", qdaptor.FromDomain(accountQueryer))
+	queryBus.Register("GetAllAccounts", qdaptor.FromDomain(accountsQueryer))
 
 	return qdaptor.ToDomain(queryBus)
 }

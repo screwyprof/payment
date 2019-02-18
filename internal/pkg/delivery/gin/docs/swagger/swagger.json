@@ -19,6 +19,51 @@
     "basePath": "/api/v1",
     "paths": {
         "/accounts": {
+            "get": {
+                "description": "Retrieves available accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Retrieves available accounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.AvailableAccount"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responder.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responder.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/responder.HTTPError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Open a new account with optional balance",
                 "consumes": [
@@ -257,6 +302,15 @@
                         "$ref": "#/definitions/response.Ledger"
                     }
                 },
+                "number": {
+                    "type": "string",
+                    "example": "ACC777"
+                }
+            }
+        },
+        "response.AvailableAccount": {
+            "type": "object",
+            "properties": {
                 "number": {
                     "type": "string",
                     "example": "ACC777"
