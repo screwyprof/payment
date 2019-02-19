@@ -1,0 +1,11 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11
+        environment:
+          GO111MODULE: "ON"
+    working_directory: /go/src/github.com/screwyprof/payment
+    steps:
+      - checkout
+      - run: go test -race -v ./...
