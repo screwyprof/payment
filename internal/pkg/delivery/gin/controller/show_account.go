@@ -7,7 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/screwyprof/payment/internal/pkg/cqrs"
-	"github.com/screwyprof/payment/internal/pkg/delivery/gin/responder"
+	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
+
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
 )
@@ -30,9 +31,9 @@ func NewShowAccount(queryBus cqrs.QueryHandler) *ShowAccount {
 // @Produce  json
 // @Param number path string true "account number"
 // @Success 200 {object} response.AccountInfo
-// @Failure 400 {object} responder.HTTPError
-// @Failure 404 {object} responder.HTTPError
-// @Failure 500 {object} responder.HTTPError
+// @Failure 400 {object} response.HTTPError
+// @Failure 404 {object} response.HTTPError
+// @Failure 500 {object} response.HTTPError
 // @Router /accounts/{number} [get]
 func (h *ShowAccount) Handle(ctx *gin.Context) {
 	number := ctx.Param("number")
@@ -40,7 +41,7 @@ func (h *ShowAccount) Handle(ctx *gin.Context) {
 	accountReport := &report.Account{}
 	err := h.queryBus.Handle(context.Background(), query.GetAccountShortInfo{Number: number}, accountReport)
 	if err != nil {
-		responder.NewError(ctx, http.StatusNotFound, err)
+		response.NewError(ctx, http.StatusNotFound, err)
 		return
 	}
 

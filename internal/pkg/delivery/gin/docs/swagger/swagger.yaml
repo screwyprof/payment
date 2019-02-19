@@ -1,11 +1,5 @@
-basePath: /api/v1
+basePath: '{{.BasePath}}'
 definitions:
-  controller.Message:
-    properties:
-      message:
-        example: message
-        type: string
-    type: object
   request.OpenAccount:
     properties:
       amount:
@@ -26,17 +20,11 @@ definitions:
       currency:
         example: USD
         type: string
+      from:
+        example: ACC777
+        type: string
       to:
         example: ACC555
-        type: string
-    type: object
-  responder.HTTPError:
-    properties:
-      code:
-        example: 400
-        type: integer
-      message:
-        example: status bad request
         type: string
     type: object
   response.AccountInfo:
@@ -58,10 +46,25 @@ definitions:
         example: ACC777
         type: string
     type: object
+  response.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
   response.Ledger:
     properties:
       action:
         example: Transfer from AK777, $100
+        type: string
+    type: object
+  response.Message:
+    properties:
+      message:
+        example: message
         type: string
     type: object
   response.ShortAccountInfo:
@@ -73,19 +76,13 @@ definitions:
         example: ACC777
         type: string
     type: object
-host: localhost:8080
+host: '{{.Host}}'
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample Payment service.
-  license:
-    name: Apache 2.0
-    url: https://github.com/screwyprof/s
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
-  version: "1.0"
+  contact: {}
+  description: '{{.Description}}'
+  license: {}
+  title: '{{.Title}}'
+  version: '{{.Version}}'
 paths:
   /accounts:
     get:
@@ -104,17 +101,17 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
       summary: Retrieves available accounts
       tags:
@@ -142,17 +139,17 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
       summary: Open a new account
       tags:
@@ -179,17 +176,17 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
       summary: Show an account
       tags:
@@ -218,17 +215,17 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.Message'
+            $ref: '#/definitions/response.Message'
             type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responder.HTTPError'
+            $ref: '#/definitions/response.HTTPError'
             type: object
       summary: Transfer money from an account to another account
       tags:

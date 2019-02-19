@@ -1,8 +1,14 @@
-package main
+package app
 
 import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/gin-gonic/gin"
-	"github.com/screwyprof/payment/pkg/report"
 
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -22,6 +28,7 @@ import (
 	"github.com/screwyprof/payment/pkg/command_handler"
 	"github.com/screwyprof/payment/pkg/event_handler"
 	"github.com/screwyprof/payment/pkg/query_handler"
+	"github.com/screwyprof/payment/pkg/report"
 )
 
 // @title Swagger Example API
@@ -39,7 +46,50 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 
-func main() {
+type GopherPay struct {
+	srv    *http.Server
+	router *gin.Engine
+}
+
+func NewGopherPay() *GopherPay {
+	router := SetupRouter()
+
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
+	return &GopherPay{router: router, srv: srv}
+}
+
+func (g *GopherPay) Run() {
+	go func() {
+		if err := g.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+
+	<-quit
+	g.Shutdown()
+}
+
+func (g *GopherPay) Shutdown() {
+	log.Println("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := g.srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	log.Println("Server exiting")
+}
+
+func SetupRouter() *gin.Engine {
 	// init deps
 	accountReporter := reporting.NewInMemoryAccountReporter()
 	accountRepo := repository.NewInMemoryAccountReporter()
@@ -75,15 +125,13 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// run server
-	r.Run(":8080")
+	return r
 }
 
 func newNotifier(accountReporter report.AccountUpdater) observer.Notifier {
 	notifier := observer.NewNotifier()
 	notifier.Register(event_handler.NewAccountOpened(accountReporter))
 	notifier.Register(event_handler.NewMoneyTransfered(accountReporter))
-	//notifier.Register(event_handler.NewMoneySentFurther(receiveMoney))
 	notifier.Register(event_handler.NewMoneyReceived(accountReporter))
 
 	return notifier
@@ -105,3 +153,10 @@ func newQueryBus(accountQueryer cqrs.QueryHandler, accountsQueryer cqrs.QueryHan
 
 	return qdaptor.ToDomain(queryBus)
 }
+
+//func failOnError(err error) {
+//	if err != nil {
+//		fmt.Printf("an error occured: %v", err)
+//		os.Exit(1)
+//	}
+//}

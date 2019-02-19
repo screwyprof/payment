@@ -10,7 +10,6 @@ import (
 	"github.com/screwyprof/payment/internal/pkg/cqrs"
 
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/request"
-	"github.com/screwyprof/payment/internal/pkg/delivery/gin/responder"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
 
 	"github.com/screwyprof/payment/pkg/command"
@@ -39,19 +38,19 @@ func NewOpenAccount(commandBus cqrs.CommandHandler, queryBus cqrs.QueryHandler) 
 // @Produce  json
 // @Param account body request.OpenAccount true "Open account"
 // @Success 200 {object} response.ShortAccountInfo
-// @Failure 400 {object} responder.HTTPError
-// @Failure 404 {object} responder.HTTPError
-// @Failure 500 {object} responder.HTTPError
+// @Failure 400 {object} response.HTTPError
+// @Failure 404 {object} response.HTTPError
+// @Failure 500 {object} response.HTTPError
 // @Router /accounts [post]
 func (h *OpenAccount) Handle(ctx *gin.Context) {
 	var req request.OpenAccount
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		responder.NewError(ctx, http.StatusBadRequest, err)
+		response.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
 
 	//if err := req.Validate(); err != nil {
-	//	responder.NewError(ctx, http.StatusBadRequest, err)
+	//	response.NewError(ctx, http.StatusBadRequest, err)
 	//	return
 	//}
 
@@ -60,14 +59,14 @@ func (h *OpenAccount) Handle(ctx *gin.Context) {
 		Balance: *money.New(req.Amount, req.Currency),
 	})
 	if err != nil {
-		responder.NewError(ctx, http.StatusInternalServerError, err)
+		response.NewError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	accountReport := &report.Account{}
 	err = h.queryBus.Handle(context.Background(), query.GetAccountShortInfo{Number: req.Number}, accountReport)
 	if err != nil {
-		responder.NewError(ctx, http.StatusNotFound, err)
+		response.NewError(ctx, http.StatusNotFound, err)
 		return
 	}
 

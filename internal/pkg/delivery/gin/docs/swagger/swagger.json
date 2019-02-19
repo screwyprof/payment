@@ -1,22 +1,14 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample Payment service.",
-        "title": "Swagger Example API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "https://github.com/screwyprof/s"
-        },
-        "version": "1.0"
+        "description": "{{.Description}}",
+        "title": "{{.Title}}",
+        "contact": {},
+        "license": {},
+        "version": "{{.Version}}"
     },
-    "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
     "paths": {
         "/accounts": {
             "get": {
@@ -45,21 +37,21 @@
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -100,21 +92,21 @@
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -154,21 +146,21 @@
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -211,21 +203,21 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/controller.Message"
+                            "$ref": "#/definitions/response.Message"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/responder.HTTPError"
+                            "$ref": "#/definitions/response.HTTPError"
                         }
                     }
                 }
@@ -233,15 +225,6 @@
         }
     },
     "definitions": {
-        "controller.Message": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "message"
-                }
-            }
-        },
         "request.OpenAccount": {
             "type": "object",
             "properties": {
@@ -270,22 +253,13 @@
                     "type": "string",
                     "example": "USD"
                 },
+                "from": {
+                    "type": "string",
+                    "example": "ACC777"
+                },
                 "to": {
                     "type": "string",
                     "example": "ACC555"
-                }
-            }
-        },
-        "responder.HTTPError": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer",
-                    "example": 400
-                },
-                "message": {
-                    "type": "string",
-                    "example": "status bad request"
                 }
             }
         },
@@ -317,12 +291,34 @@
                 }
             }
         },
+        "response.HTTPError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "type": "string",
+                    "example": "status bad request"
+                }
+            }
+        },
         "response.Ledger": {
             "type": "object",
             "properties": {
                 "action": {
                     "type": "string",
                     "example": "Transfer from AK777, $100"
+                }
+            }
+        },
+        "response.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "message"
                 }
             }
         },
