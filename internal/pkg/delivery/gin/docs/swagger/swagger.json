@@ -1,14 +1,22 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "{{.Description}}",
-        "title": "{{.Title}}",
-        "contact": {},
-        "license": {},
-        "version": "{{.Version}}"
+        "description": "This is a sample Payment service.",
+        "title": "Swagger Example API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://github.com/screwyprof/s"
+        },
+        "version": "1.0"
     },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
     "paths": {
         "/accounts": {
             "get": {

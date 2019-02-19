@@ -1,4 +1,4 @@
-basePath: '{{.BasePath}}'
+basePath: /api/v1
 definitions:
   request.OpenAccount:
     properties:
@@ -76,13 +76,19 @@ definitions:
         example: ACC777
         type: string
     type: object
-host: '{{.Host}}'
+host: localhost:8080
 info:
-  contact: {}
-  description: '{{.Description}}'
-  license: {}
-  title: '{{.Title}}'
-  version: '{{.Version}}'
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample Payment service.
+  license:
+    name: Apache 2.0
+    url: https://github.com/screwyprof/s
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
 paths:
   /accounts:
     get:
