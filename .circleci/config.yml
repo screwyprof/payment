@@ -7,5 +7,5 @@ jobs:
     steps:
       - checkout
       - run: go get -v -t -d ./...
-      - run: ./tools/test.sh
+      - run: ./tools/coverage.sh
       - run: bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
