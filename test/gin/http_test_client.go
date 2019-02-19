@@ -4,9 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 )
+
+type HttpError struct {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e HttpError) Error() string {
+	return e.Message
+}
 
 type HttpTestClient struct {
 	handler http.Handler
@@ -20,6 +30,14 @@ func (c *HttpTestClient) SendGetRequest(path string, resp interface{}) error {
 	if w.Body == nil {
 		return fmt.Errorf("server response is nil")
 	}
+
+	bodyBytes, _ := ioutil.ReadAll(w.Body)
+	if err := c.tryUnmarshalAsError(bodyBytes); err != nil {
+		return err
+	}
+
+	//reset the response body to the original unread state
+	w.Body = bytes.NewBuffer(bodyBytes)
 
 	return json.NewDecoder(w.Body).Decode(&resp)
 }
@@ -35,4 +53,16 @@ func (c *HttpTestClient) SendPostRequest(path string, r interface{}, resp interf
 	}
 
 	return json.NewDecoder(w.Body).Decode(&resp)
+}
+
+func (c *HttpTestClient) tryUnmarshalAsError(body []byte) error {
+	dec := json.NewDecoder(bytes.NewBuffer(body))
+	dec.DisallowUnknownFields()
+
+	resp := HttpError{}
+	if err := dec.Decode(&resp); err == nil {
+		return resp
+	}
+
+	return nil
 }

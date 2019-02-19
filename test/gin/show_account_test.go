@@ -29,3 +29,12 @@ func (s *GopherPayTestSuite) ShowAccount_ShowACC777(t *testing.T) {
 	// assert
 	assert.Equal(t, expected, obtained)
 }
+
+func (s *GopherPayTestSuite) ShowAccount_NotFound(t *testing.T) {
+
+	// act
+	_, err := s.client.ShowAccount("NonExistent")
+
+	// assert
+	assert.EqualError(t, err, "cannot retrieve account: account NonExistent is not found")
+}

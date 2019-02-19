@@ -47,5 +47,10 @@ func (s *GopherPayTestSuite) TestGopherPay() {
 
 	s.T().Run("ShowAccount", func(t *testing.T) {
 		s.ShowAccount_ShowACC777(t)
+		s.ShowAccount_NotFound(t)
+	})
+
+	s.T().Run("ShowAvailableAccounts", func(t *testing.T) {
+		s.ShowAvailableAccounts(t)
 	})
 }

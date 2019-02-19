@@ -16,6 +16,13 @@ func (c *GopherPayTestClient) ShowAccount(number string) (response.AccountInfo, 
 	return resp, err
 }
 
+func (c *GopherPayTestClient) ShowAvailableAccounts() ([]response.AvailableAccount, error) {
+	resp := []response.AvailableAccount{}
+	err := c.client.SendGetRequest("/api/v1/accounts", &resp)
+
+	return resp, err
+}
+
 func (c *GopherPayTestClient) OpenAccount(r request.OpenAccount) (response.ShortAccountInfo, error) {
 	resp := response.ShortAccountInfo{}
 	err := c.client.SendPostRequest("/api/v1/accounts", r, &resp)
