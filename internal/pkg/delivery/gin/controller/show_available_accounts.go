@@ -6,20 +6,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
 
+	"github.com/screwyprof/payment/pkg/domain"
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
 )
 
 // ShowAvailableAccounts Retrieves available accounts.
 type ShowAvailableAccounts struct {
-	queryBus cqrs.QueryHandler
+	queryBus domain.QueryHandler
 }
 
 // NewShowAvailableAccounts Creates a new instance of ShowAvailableAccounts.
-func NewShowAvailableAccounts(queryBus cqrs.QueryHandler) *ShowAvailableAccounts {
+func NewShowAvailableAccounts(queryBus domain.QueryHandler) *ShowAvailableAccounts {
 	return &ShowAvailableAccounts{queryBus: queryBus}
 }
 

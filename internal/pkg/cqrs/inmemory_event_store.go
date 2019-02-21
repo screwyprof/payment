@@ -2,20 +2,22 @@ package cqrs
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/screwyprof/bank/pkg/domain"
 	"sync"
+
+	"github.com/google/uuid"
+
+	"github.com/screwyprof/payment/pkg/domain"
 )
 
 // InMemoryEventStore implements EventStore as an in memory structure.
 type InMemoryEventStore struct {
-	eventStreams map[uuid.UUID][]domain.DomainEvent
+	eventStreams   map[uuid.UUID][]domain.DomainEvent
 	eventStreamsMu sync.RWMutex
 }
 
 func NewInMemoryEventStore() *InMemoryEventStore {
 	return &InMemoryEventStore{
-		eventStreams:make(map[uuid.UUID][]domain.DomainEvent),
+		eventStreams: make(map[uuid.UUID][]domain.DomainEvent),
 	}
 }
 

@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.3.0
 	github.com/go-openapi/jsonreference v0.18.0 // indirect
 	github.com/go-openapi/spec v0.18.0 // indirect
+	github.com/google/uuid v1.1.0
 	github.com/json-iterator/go v1.1.5 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

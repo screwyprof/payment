@@ -1,23 +1,28 @@
 package cqrs
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
-	"github.com/screwyprof/bank/pkg/domain"
+	"github.com/screwyprof/payment/internal/pkg/observer"
+
+	"github.com/screwyprof/payment/pkg/domain"
 )
 
 type EventSourceHandler struct {
-	eventStore domain.EventStore
+	eventStore    domain.EventStore
+	eventNotifier observer.Notifier
 }
 
-func NewEventSourceHandler(eventStore domain.EventStore) *EventSourceHandler {
+func NewEventSourceHandler(eventStore domain.EventStore, eventNotifier observer.Notifier) *EventSourceHandler {
 	return &EventSourceHandler{
-		eventStore:eventStore,
+		eventStore:    eventStore,
+		eventNotifier: eventNotifier,
 	}
 }
 
-func (h *EventSourceHandler) Handle(c domain.Command) error {
+func (h *EventSourceHandler) Handle(ctx context.Context, c domain.Command) error {
 	eventStream, err := h.eventStore.LoadEventStream(c.AggregateID())
 	if err != nil {
 		return err
@@ -45,6 +50,9 @@ func (h *EventSourceHandler) Handle(c domain.Command) error {
 	}
 
 	// publish events
+	for _, event := range events {
+		h.eventNotifier.Notify(event)
+	}
 
 	return nil
 }
@@ -104,4 +112,3 @@ func handle(agg domain.Aggregate, cmd domain.Command) ([]domain.DomainEvent, err
 
 	return events, nil
 }
-

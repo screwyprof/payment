@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
+	"github.com/screwyprof/payment/pkg/domain"
 
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
@@ -14,11 +14,11 @@ type getAccountShortInfo struct {
 	accountProvider report.GetAccountByNumber
 }
 
-func NewGetAccountShortInfo(accountProvider report.GetAccountByNumber) cqrs.QueryHandler {
+func NewGetAccountShortInfo(accountProvider report.GetAccountByNumber) domain.QueryHandler {
 	return &getAccountShortInfo{accountProvider: accountProvider}
 }
 
-func (intr *getAccountShortInfo) Handle(ctx context.Context, q cqrs.Query, result interface{}) error {
+func (intr *getAccountShortInfo) Handle(ctx context.Context, q domain.Query, result interface{}) error {
 	req, ok := q.(query.GetAccountShortInfo)
 	if !ok {
 		return fmt.Errorf("invalid query %+#v given", q)

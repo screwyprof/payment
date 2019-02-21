@@ -17,14 +17,14 @@ func NewInMemoryAccountReporter() *InMemoryAccountReporter {
 }
 
 func (r *InMemoryAccountReporter) ByNumber(number string) (*report.Account, error) {
-	fmt.Printf("ReadSide: retreiving account %s\n", number)
+	//fmt.Printf("ReadSide: retreiving account %s\n", number)
 
 	acc, ok := r.accounts[number]
 	if !ok {
 		return &report.Account{}, fmt.Errorf("account %s is not found", number)
 	}
 
-	fmt.Printf("ReadSide: account %s retrieved with balance %s\n", number, acc.Balance.Display())
+	//fmt.Printf("ReadSide: account %s retrieved with balance %s\n", number, acc.Balance.Display())
 	return acc, nil
 }
 
@@ -52,6 +52,6 @@ func (r *InMemoryAccountReporter) Update(acc *report.Account) error {
 
 	r.accounts[acc.Number] = current
 
-	fmt.Printf("ReadSide: updating account %s with balance %s\n", acc.Number, acc.Balance.Display())
+	//fmt.Printf("ReadSide: updating account %s with balance %s\n", acc.Number, acc.Balance.Display())
 	return nil
 }

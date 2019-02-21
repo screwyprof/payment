@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/screwyprof/bank/pkg/domain"
+	"github.com/screwyprof/payment/pkg/domain"
 )
 
 type AggregateFactory func(uuid.UUID) domain.Aggregate

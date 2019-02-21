@@ -3,14 +3,14 @@ package event
 import "github.com/google/uuid"
 
 type DomainEvent struct {
-	ID uuid.UUID
+	ID    uuid.UUID
 	AggID uuid.UUID
 }
 
-func NewDomainEvent(aggID uuid.UUID) DomainEvent{
+func NewDomainEvent(aggID uuid.UUID) DomainEvent {
 	return DomainEvent{
-		ID: uuid.New(),
-		AggID:aggID,
+		ID:    uuid.New(),
+		AggID: aggID,
 	}
 }
 

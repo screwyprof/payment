@@ -1,16 +1,32 @@
-package cqrs
+package domain
 
-import "context"
+import (
+	"context"
 
-// Command defines command parameters.
+	"github.com/google/uuid"
+)
+
 type Command interface {
-	CommandID() string
+	AggregateID() uuid.UUID
+	AggregateType() string
 }
 
-// CommandHandler executes a use case.
 type CommandHandler interface {
-	// Handle handles the given command and returns.
 	Handle(ctx context.Context, c Command) error
+}
+
+type DomainEvent interface {
+	EventID() uuid.UUID
+	AggregateID() uuid.UUID
+}
+
+type Aggregate interface {
+	AggregateID() uuid.UUID
+}
+
+type EventStore interface {
+	LoadEventStream(aggregateID uuid.UUID) ([]DomainEvent, error)
+	Store(aggregateID uuid.UUID, version uint64, events []DomainEvent) error
 }
 
 // Query defines query parameters.
@@ -22,8 +38,4 @@ type Query interface {
 type QueryHandler interface {
 	// Handle handles the given query and returns the report.
 	Handle(ctx context.Context, q Query, report interface{}) error
-}
-
-type Event interface {
-	EventID() string
 }

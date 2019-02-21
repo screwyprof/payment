@@ -7,23 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rhymond/go-money"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
-
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/request"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
 
 	"github.com/screwyprof/payment/pkg/command"
-	"github.com/screwyprof/payment/pkg/domain/account"
+	"github.com/screwyprof/payment/pkg/domain"
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
 )
 
 type OpenAccount struct {
-	commandBus cqrs.CommandHandler
-	queryBus   cqrs.QueryHandler
+	commandBus domain.CommandHandler
+	queryBus   domain.QueryHandler
 }
 
-func NewOpenAccount(commandBus cqrs.CommandHandler, queryBus cqrs.QueryHandler) *OpenAccount {
+func NewOpenAccount(commandBus domain.CommandHandler, queryBus domain.QueryHandler) *OpenAccount {
 	return &OpenAccount{
 		commandBus: commandBus,
 		queryBus:   queryBus,
@@ -55,7 +53,7 @@ func (h *OpenAccount) Handle(ctx *gin.Context) {
 	//}
 
 	err := h.commandBus.Handle(context.Background(), command.OpenAccount{
-		Number:  account.Number(req.Number),
+		Number:  req.Number,
 		Balance: *money.New(req.Amount, req.Currency),
 	})
 	if err != nil {

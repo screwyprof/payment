@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -16,16 +17,15 @@ import (
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/controller"
 	_ "github.com/screwyprof/payment/internal/pkg/delivery/gin/docs"
 
-	cmdadaptor "github.com/screwyprof/payment/internal/pkg/adaptor/command_handler"
 	qdaptor "github.com/screwyprof/payment/internal/pkg/adaptor/query_handler"
 
 	"github.com/screwyprof/payment/internal/pkg/bus"
 	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/observer"
 	"github.com/screwyprof/payment/internal/pkg/reporting"
-	"github.com/screwyprof/payment/internal/pkg/repository"
 
-	"github.com/screwyprof/payment/pkg/command_handler"
+	"github.com/screwyprof/payment/pkg/domain"
+	"github.com/screwyprof/payment/pkg/domain/account"
 	"github.com/screwyprof/payment/pkg/event_handler"
 	"github.com/screwyprof/payment/pkg/query_handler"
 	"github.com/screwyprof/payment/pkg/report"
@@ -91,22 +91,22 @@ func (g *GopherPay) Shutdown() {
 
 func SetupRouter() *gin.Engine {
 	// init deps
+	cqrs.RegisterAggregate(func(id uuid.UUID) domain.Aggregate {
+		return account.Create(id)
+	})
+
 	accountReporter := reporting.NewInMemoryAccountReporter()
-	accountRepo := repository.NewInMemoryAccountReporter()
 	notifier := newNotifier(accountReporter)
 
-	accountOpenner := command_handler.NewOpenAccount(accountRepo, notifier)
-	moneyTransfer := command_handler.NewTransferMoney(accountRepo, accountRepo, notifier)
-	moneyReceiver := command_handler.NewReceiveMoney(accountRepo, accountRepo, notifier)
-	commandBus := newCommandBus(moneyTransfer, moneyReceiver, accountOpenner)
+	eventStore := cqrs.NewInMemoryEventStore()
+	commandHandler := cqrs.NewEventSourceHandler(eventStore, notifier)
 
 	accountQueryer := query_handler.NewGetAccountShortInfo(accountReporter)
-	accountsQueryer := query_handler.NewGetAllAccounts(accountReporter)
-	queryBus := newQueryBus(accountQueryer, accountsQueryer)
+	queryBus := newQueryBus(accountQueryer)
 
-	openAccountCtrl := controller.NewOpenAccount(commandBus, queryBus)
+	openAccountCtrl := controller.NewOpenAccount(commandHandler, queryBus)
 	showAccountCtrl := controller.NewShowAccount(queryBus)
-	transferMoneyCtrl := controller.NewTransferMoney(commandBus, queryBus)
+	transferMoneyCtrl := controller.NewTransferMoney(commandHandler, queryBus)
 	showAvailableAccountsCtrl := controller.NewShowAvailableAccounts(queryBus)
 
 	// init router
@@ -137,26 +137,9 @@ func newNotifier(accountReporter report.AccountUpdater) observer.Notifier {
 	return notifier
 }
 
-func newCommandBus(moneyTransfer, moneyReceiver, accountOpenner cqrs.CommandHandler) cqrs.CommandHandler {
-	commandBus := bus.NewCommandBus()
-	commandBus.Register("OpenAccount", cmdadaptor.FromDomain(accountOpenner))
-	commandBus.Register("TransferMoney", cmdadaptor.FromDomain(moneyTransfer))
-	commandBus.Register("ReceiveMoney", cmdadaptor.FromDomain(moneyReceiver))
-
-	return cmdadaptor.ToDomain(commandBus)
-}
-
-func newQueryBus(accountQueryer cqrs.QueryHandler, accountsQueryer cqrs.QueryHandler) cqrs.QueryHandler {
+func newQueryBus(accountQueryer domain.QueryHandler) domain.QueryHandler {
 	queryBus := bus.NewQueryHandlerBus()
 	queryBus.Register("GetAccountShortInfo", qdaptor.FromDomain(accountQueryer))
-	queryBus.Register("GetAllAccounts", qdaptor.FromDomain(accountsQueryer))
 
 	return qdaptor.ToDomain(queryBus)
 }
-
-//func failOnError(err error) {
-//	if err != nil {
-//		fmt.Printf("an error occured: %v", err)
-//		os.Exit(1)
-//	}
-//}
