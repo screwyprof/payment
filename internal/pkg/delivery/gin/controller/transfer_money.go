@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/screwyprof/payment/pkg/report"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,14 +19,14 @@ import (
 // TransferMoney Tansfers money from one account to another.
 type TransferMoney struct {
 	commandBus domain.CommandHandler
-	queryBus   domain.QueryHandler
+	idByNumber report.IDByNumber
 }
 
 // NewTransferMoney Creates a new instance of TransferMoney.
-func NewTransferMoney(commandBus domain.CommandHandler, queryBus domain.QueryHandler) *TransferMoney {
+func NewTransferMoney(commandBus domain.CommandHandler, idByNumber report.IDByNumber) *TransferMoney {
 	return &TransferMoney{
 		commandBus: commandBus,
-		queryBus:   queryBus,
+		idByNumber: idByNumber,
 	}
 }
 
@@ -57,7 +58,13 @@ func (h *TransferMoney) Handle(ctx *gin.Context) {
 
 	amount := *money.New(req.Amount, req.Currency)
 
-	err := h.commandBus.Handle(context.Background(), command.TransferMoney{
+	fromAccID, err := h.idByNumber.IDByNumber(req.From)
+	if err != nil {
+		response.NewError(ctx, http.StatusInternalServerError, err)
+	}
+
+	err = h.commandBus.Handle(context.Background(), command.TransferMoney{
+		AggID:  fromAccID,
 		From:   req.From,
 		To:     req.To,
 		Amount: amount,
@@ -67,7 +74,13 @@ func (h *TransferMoney) Handle(ctx *gin.Context) {
 		return
 	}
 
+	toAccID, err := h.idByNumber.IDByNumber(req.To)
+	if err != nil {
+		response.NewError(ctx, http.StatusInternalServerError, err)
+	}
+
 	err = h.commandBus.Handle(context.Background(), command.ReceiveMoney{
+		AggID:  toAccID,
 		From:   req.From,
 		To:     req.To,
 		Amount: amount,

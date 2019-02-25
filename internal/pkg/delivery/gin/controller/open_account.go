@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,7 @@ func (h *OpenAccount) Handle(ctx *gin.Context) {
 	//}
 
 	err := h.commandBus.Handle(context.Background(), command.OpenAccount{
+		AggID:   uuid.New(),
 		Number:  req.Number,
 		Balance: *money.New(req.Amount, req.Currency),
 	})

@@ -2,6 +2,7 @@ package reporting
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 
 	"github.com/screwyprof/payment/pkg/report"
 )
@@ -14,6 +15,15 @@ func NewInMemoryAccountReporter() *InMemoryAccountReporter {
 	return &InMemoryAccountReporter{
 		accounts: make(map[string]*report.Account),
 	}
+}
+
+func (r *InMemoryAccountReporter) IDByNumber(number string) (uuid.UUID, error) {
+	acc, ok := r.accounts[number]
+	if !ok {
+		return uuid.Nil, fmt.Errorf("account %s is not found", number)
+	}
+
+	return acc.ID, nil
 }
 
 func (r *InMemoryAccountReporter) ByNumber(number string) (*report.Account, error) {

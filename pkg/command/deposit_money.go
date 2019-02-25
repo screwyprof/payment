@@ -6,8 +6,7 @@ import (
 )
 
 type DepositMoney struct {
-	AggID   uuid.UUID
-	AggType string
+	AggID uuid.UUID
 
 	Amount money.Money
 }

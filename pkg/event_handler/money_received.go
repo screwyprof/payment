@@ -28,6 +28,7 @@ func (h *MoneyReceived) Handle(e observer.Event) {
 	//fmt.Printf("MoneyReceivedEventHandler: %s - %s => %s, %s = %s\n",
 	//	evn.From, evn.Amount.Display(), evn.To, evn.To, evn.Balance.Display())
 	rep := &report.Account{
+		ID:      evn.AggID,
 		Number:  string(evn.To),
 		Balance: evn.Balance,
 		Ledgers: []report.Ledger{

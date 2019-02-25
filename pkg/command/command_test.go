@@ -6,22 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOpenAccount_CommandID(t *testing.T) {
+func TestOpenAccount_AggregateType(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, "OpenAccount", OpenAccount{}.CommandID())
+	assert.Equal(t, "account.Account", OpenAccount{}.AggregateType())
 }
 
-func TestTransferMoney_CommandID(t *testing.T) {
+func TestTransferMoney_AggregateType(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, "TransferMoney", TransferMoney{}.CommandID())
+	assert.Equal(t, "account.Account", TransferMoney{}.AggregateType())
 }
 
-func TestReceiveMoney_CommandID(t *testing.T) {
+func TestReceiveMoney_AggregateType(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, "ReceiveMoney", ReceiveMoney{}.CommandID())
+	assert.Equal(t, "account.Account", ReceiveMoney{}.AggregateType())
 }
 
-func TestUnknown_CommandID(t *testing.T) {
+func TestUnknown_AggregateType(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, "Unknown", Unknown{}.CommandID())
+	assert.Equal(t, "unknown.Unknown", Unknown{}.AggregateType())
 }

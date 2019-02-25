@@ -6,8 +6,7 @@ import (
 )
 
 type ReceiveMoney struct {
-	AggID   uuid.UUID
-	AggType string
+	AggID uuid.UUID
 
 	From   string
 	To     string

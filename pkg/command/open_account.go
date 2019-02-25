@@ -6,8 +6,7 @@ import (
 )
 
 type OpenAccount struct {
-	AggID   uuid.UUID
-	AggType string
+	AggID uuid.UUID
 
 	Balance money.Money
 	Number  string

@@ -102,11 +102,12 @@ func SetupRouter() *gin.Engine {
 	commandHandler := cqrs.NewEventSourceHandler(eventStore, notifier)
 
 	accountQueryer := query_handler.NewGetAccountShortInfo(accountReporter)
-	queryBus := newQueryBus(accountQueryer)
+	availableAccountsQueryer := query_handler.NewGetAllAccounts(accountReporter)
+	queryBus := newQueryBus(accountQueryer, availableAccountsQueryer)
 
 	openAccountCtrl := controller.NewOpenAccount(commandHandler, queryBus)
 	showAccountCtrl := controller.NewShowAccount(queryBus)
-	transferMoneyCtrl := controller.NewTransferMoney(commandHandler, queryBus)
+	transferMoneyCtrl := controller.NewTransferMoney(commandHandler, accountReporter)
 	showAvailableAccountsCtrl := controller.NewShowAvailableAccounts(queryBus)
 
 	// init router
@@ -137,9 +138,10 @@ func newNotifier(accountReporter report.AccountUpdater) observer.Notifier {
 	return notifier
 }
 
-func newQueryBus(accountQueryer domain.QueryHandler) domain.QueryHandler {
+func newQueryBus(accountQueryer, availableAccountsQueryer domain.QueryHandler) domain.QueryHandler {
 	queryBus := bus.NewQueryHandlerBus()
 	queryBus.Register("GetAccountShortInfo", qdaptor.FromDomain(accountQueryer))
+	queryBus.Register("GetAllAccounts", qdaptor.FromDomain(availableAccountsQueryer))
 
 	return qdaptor.ToDomain(queryBus)
 }
