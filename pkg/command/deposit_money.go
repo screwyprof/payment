@@ -5,18 +5,16 @@ import (
 	"github.com/rhymond/go-money"
 )
 
-type TransferMoney struct {
+type DepositMoney struct {
 	AggID uuid.UUID
 
-	From   string
-	To     string
 	Amount money.Money
 }
 
-func (c TransferMoney) AggregateID() uuid.UUID {
+func (c DepositMoney) AggregateID() uuid.UUID {
 	return c.AggID
 }
 
-func (c TransferMoney) AggregateType() string {
+func (c DepositMoney) AggregateType() string {
 	return "account.Account"
 }

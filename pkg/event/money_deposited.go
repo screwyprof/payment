@@ -5,17 +5,17 @@ import (
 	"github.com/rhymond/go-money"
 )
 
-type AccountOpened struct {
+type MoneyDeposited struct {
 	DomainEvent
 
-	Number  string
+	Amount  money.Money
 	Balance money.Money
 }
 
-func NewAccountOpened(aggID uuid.UUID, number string, balance money.Money) AccountOpened {
-	return AccountOpened{
+func NewMoneyDeposited(aggID uuid.UUID, amount, balance money.Money) MoneyDeposited {
+	return MoneyDeposited{
 		DomainEvent: NewDomainEvent(aggID),
-		Number:      number,
+		Amount:      amount,
 		Balance:     balance,
 	}
 }

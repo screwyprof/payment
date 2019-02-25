@@ -1,22 +1,21 @@
-package example_test
+package example
 
 import (
 	"context"
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/rhymond/go-money"
 
-	cmdadaptor "github.com/screwyprof/payment/internal/pkg/adaptor/command_handler"
 	qdaptor "github.com/screwyprof/payment/internal/pkg/adaptor/query_handler"
 	"github.com/screwyprof/payment/internal/pkg/bus"
 	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/observer"
 	"github.com/screwyprof/payment/internal/pkg/reporting"
-	"github.com/screwyprof/payment/internal/pkg/repository"
 
 	"github.com/screwyprof/payment/pkg/command"
-	"github.com/screwyprof/payment/pkg/command_handler"
+	"github.com/screwyprof/payment/pkg/domain"
 	"github.com/screwyprof/payment/pkg/domain/account"
 	"github.com/screwyprof/payment/pkg/event_handler"
 	"github.com/screwyprof/payment/pkg/query"
@@ -26,19 +25,19 @@ import (
 
 func Example() {
 	// init deps
+	cqrs.RegisterAggregate(func(id uuid.UUID) domain.Aggregate {
+		return account.Create(id)
+	})
+
 	accountReporter := reporting.NewInMemoryAccountReporter()
-	accountRepo := repository.NewInMemoryAccountReporter()
 
 	notifier := observer.NewNotifier()
 	notifier.Register(event_handler.NewAccountOpened(accountReporter))
 	notifier.Register(event_handler.NewMoneyTransfered(accountReporter))
-	//notifier.Register(event_handler.NewMoneySentFurther(receiveMoney))
 	notifier.Register(event_handler.NewMoneyReceived(accountReporter))
 
-	accountOpenner := command_handler.NewOpenAccount(accountRepo, notifier)
-	moneyTransfer := command_handler.NewTransferMoney(accountRepo, accountRepo, notifier)
-	moneyReceiver := command_handler.NewReceiveMoney(accountRepo, accountRepo, notifier)
-	commandBus := newCommandBus(moneyTransfer, moneyReceiver, accountOpenner)
+	eventStore := cqrs.NewInMemoryEventStore()
+	commandHandler := cqrs.NewEventSourceHandler(eventStore, notifier)
 
 	accountQueryer := query_handler.NewGetAccountShortInfo(accountReporter)
 	queryBus := newQueryBus(accountQueryer)
@@ -46,83 +45,60 @@ func Example() {
 	// Run test script
 
 	// create a couple of accounts
-	acc1Number := account.Number("ACC500") //account.GenerateAccNumber()
-	openAccount(commandBus, acc1Number, *money.New(50000, "USD"))
+	acc1ID := uuid.New()
+	acc1Number := "ACC500" //account.GenerateAccNumber()
+	openAccount(commandHandler, acc1ID, acc1Number, *money.New(50000, "USD"))
 
-	acc2Number := account.Number("ACC300") //account.GenerateAccNumber()
-	openAccount(commandBus, acc2Number, *money.New(30000, "USD"))
+	acc2ID := uuid.New()
+	acc2Number := "ACC300" //account.GenerateAccNumber()
+	openAccount(commandHandler, acc2ID, acc2Number, *money.New(30000, "USD"))
 
 	// get accounts info
 	queryAccount(queryBus, string(acc1Number))
 	queryAccount(queryBus, string(acc2Number))
 
 	// transfer money and show results
-	transferMoney(commandBus, acc1Number, acc2Number, *money.New(30000, "USD"))
+	transferMoney(commandHandler, acc1ID, acc2ID, acc1Number, acc2Number, *money.New(30000, "USD"))
 	queryAccount(queryBus, string(acc1Number))
 	queryAccount(queryBus, string(acc2Number))
 
 	// Output:
-	// WriteSide: saving account ACC500 = $500.00
-	// WriteSide: saving account ACC300 = $300.00
-	// ReadSide: retreiving account ACC500
-	// ReadSide: account ACC500 retrieved with balance $500.00
+	//
 	// #ACC500: $500.00
 	// Ledgers:
 	// #1. Deposit, $500.00
-	// ReadSide: retreiving account ACC300
-	// ReadSide: account ACC300 retrieved with balance $300.00
 	// #ACC300: $300.00
 	// Ledgers:
 	// #1. Deposit, $300.00
-	// WriteSide: retrieving account ACC500
-	// WriteSide: account ACC500 retrieved with balance $500.00
-	// WriteSide: saving account ACC500 = $200.00
-	// ReadSide: updating account ACC500 with balance $200.00
-	// WriteSide: retrieving account ACC300
-	// WriteSide: account ACC300 retrieved with balance $300.00
-	// WriteSide: saving account ACC300 = $600.00
-	// ReadSide: updating account ACC300 with balance $600.00
-	// ReadSide: retreiving account ACC500
-	// ReadSide: account ACC500 retrieved with balance $200.00
 	// #ACC500: $200.00
 	// Ledgers:
 	// #1. Deposit, $500.00
 	// #2. Transfer to ACC300, $300.00
-	// ReadSide: retreiving account ACC300
-	// ReadSide: account ACC300 retrieved with balance $600.00
 	// #ACC300: $600.00
 	// Ledgers:
 	// #1. Deposit, $300.00
 	// #2. Transfer from ACC500, $300.00
-
 }
 
-func newCommandBus(moneyTransfer, moneyReceiver, accountOpenner cqrs.CommandHandler) cqrs.CommandHandler {
-	commandBus := bus.NewCommandBus()
-	commandBus.Register("OpenAccount", cmdadaptor.FromDomain(accountOpenner))
-	commandBus.Register("TransferMoney", cmdadaptor.FromDomain(moneyTransfer))
-	commandBus.Register("ReceiveMoney", cmdadaptor.FromDomain(moneyReceiver))
-
-	return cmdadaptor.ToDomain(commandBus)
-}
-
-func newQueryBus(accountQueryer cqrs.QueryHandler) cqrs.QueryHandler {
+func newQueryBus(accountQueryer domain.QueryHandler) domain.QueryHandler {
 	queryBus := bus.NewQueryHandlerBus()
 	queryBus.Register("GetAccountShortInfo", qdaptor.FromDomain(accountQueryer))
 
 	return qdaptor.ToDomain(queryBus)
 }
 
-func openAccount(commandBus cqrs.CommandHandler, number account.Number, balance money.Money) {
+func openAccount(commandBus domain.CommandHandler, ID uuid.UUID, number string, balance money.Money) {
 	openAccountCmd := command.OpenAccount{
+		AggID:   ID,
 		Number:  number,
 		Balance: balance,
 	}
 	failOnError(commandBus.Handle(context.Background(), openAccountCmd))
 }
 
-func transferMoney(commandBus cqrs.CommandHandler, from, to account.Number, amount money.Money) {
+func transferMoney(commandBus domain.CommandHandler, fromID, toID uuid.UUID, from, to string, amount money.Money) {
 	transferCmd := command.TransferMoney{
+		AggID:  fromID,
 		From:   from,
 		To:     to,
 		Amount: amount,
@@ -130,6 +106,7 @@ func transferMoney(commandBus cqrs.CommandHandler, from, to account.Number, amou
 	failOnError(commandBus.Handle(context.Background(), transferCmd))
 
 	receiveCmd := command.ReceiveMoney{
+		AggID:  toID,
 		From:   from,
 		To:     to,
 		Amount: amount,
@@ -137,7 +114,7 @@ func transferMoney(commandBus cqrs.CommandHandler, from, to account.Number, amou
 	failOnError(commandBus.Handle(context.Background(), receiveCmd))
 }
 
-func queryAccount(queryBus cqrs.QueryHandler, number string) {
+func queryAccount(queryBus domain.QueryHandler, number string) {
 	acc := &report.Account{}
 	err := queryBus.Handle(context.Background(), query.GetAccountShortInfo{Number: number}, acc)
 	failOnError(err)

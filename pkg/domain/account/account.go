@@ -5,8 +5,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rhymond/go-money"
 
+	"github.com/screwyprof/payment/pkg/command"
+	"github.com/screwyprof/payment/pkg/domain"
 	"github.com/screwyprof/payment/pkg/event"
 )
 
@@ -20,88 +23,92 @@ func GenerateNumber() Number {
 
 // Account An Account representation.
 type Account struct {
+	AggID uuid.UUID
+
 	Number  Number
 	Balance money.Money
 }
 
-// CreateEmpty Creates a new account instance.
-func CreateEmpty() *Account {
-	return &Account{}
+// Create Creates a new account instance.
+func Create(aggID uuid.UUID) *Account {
+	return &Account{
+		AggID: aggID,
+	}
+}
+
+// AggregateID Returns aggregate ID.
+func (a *Account) AggregateID() uuid.UUID {
+	return a.AggID
 }
 
 // OpenAccount Opens a new account with optional starting balance.
-func (a *Account) OpenAccount(number Number, balance money.Money) event.AccountOpened {
-	a.Number = number
-	a.Balance = balance
-
-	return event.AccountOpened{
-		Number:  string(a.Number),
-		Balance: a.Balance,
-	}
+func (a *Account) OpenAccount(c command.OpenAccount) ([]domain.DomainEvent, error) {
+	return []domain.DomainEvent{event.NewAccountOpened(a.AggID, string(c.Number), c.Balance)}, nil
 }
 
-// Deposit Credits the account.
-func (a *Account) Deposit(amount money.Money) (event.MoneyDeposited, error) {
-	balance, err := a.Balance.Add(&amount)
+// DepositMoney Credits the account.
+func (a *Account) DepositMoney(c command.DepositMoney) ([]domain.DomainEvent, error) {
+	balance, err := a.Balance.Add(&c.Amount)
 	if err != nil {
-		return event.MoneyDeposited{}, fmt.Errorf("cannot deposit account %s: %v", a.Number, err)
+		return nil, fmt.Errorf("cannot deposit account %s: %v", a.Number, err)
 	}
 
-	a.Balance = *balance
-
-	return event.MoneyDeposited{
-		Number:  string(a.Number),
-		Amount:  amount,
-		Balance: *balance,
-	}, nil
+	return []domain.DomainEvent{event.NewMoneyDeposited(a.AggID, c.Amount, *balance)}, nil
 }
 
-// SendTransferTo Creates a transaction to transfer money from an account to another account.
-func (a *Account) SendTransferTo(to Number, amount money.Money) (event.MoneyTransferred, error) {
-	if err := a.ensureAccountsAreDifferent(a.Number, to); err != nil {
-		return event.MoneyTransferred{}, err
+// TransferMoney Creates a transaction to transfer money from an account to another account.
+func (a *Account) TransferMoney(c command.TransferMoney) ([]domain.DomainEvent, error) {
+	if err := a.ensureAccountsAreDifferent(a.Number, Number(c.To)); err != nil {
+		return nil, err
 	}
 
-	newBalance, err := a.Balance.Subtract(&amount)
+	newBalance, err := a.Balance.Subtract(&c.Amount)
 	if err != nil {
-		return event.MoneyTransferred{}, fmt.Errorf("cannot send transfer from %s to %s: %v", a.Number, to, err)
+		return nil, fmt.Errorf("cannot send transfer from %s to %s: %v", a.Number, c.To, err)
 	}
 
 	if newBalance.IsNegative() || newBalance.IsZero() {
-		return event.MoneyTransferred{},
-			fmt.Errorf("cannot send transfer from %s to %s: balance %s is not high enough",
-				a.Number, to, newBalance.Display())
+		return nil, fmt.Errorf("cannot send transfer from %s to %s: balance %s is not high enough",
+			a.Number, c.To, newBalance.Display())
 	}
 
-	a.Balance = *newBalance
-
-	return event.MoneyTransferred{
-		From:    string(a.Number),
-		To:      string(to),
-		Amount:  amount,
-		Balance: *newBalance,
+	return []domain.DomainEvent{
+		event.NewMoneyTransferred(a.AggregateID(), string(a.Number), c.To, c.Amount, *newBalance),
 	}, nil
 }
 
-// ReceiveMoneyFrom Receives the money from the given account.
-func (a *Account) ReceiveMoneyFrom(from Number, amount money.Money) (event.MoneyReceived, error) {
-	if err := a.ensureAccountsAreDifferent(from, a.Number); err != nil {
-		return event.MoneyReceived{}, err
+// ReceiveMoney Receives the money from the given account.
+func (a *Account) ReceiveMoney(c command.ReceiveMoney) ([]domain.DomainEvent, error) {
+	if err := a.ensureAccountsAreDifferent(Number(c.From), a.Number); err != nil {
+		return nil, err
 	}
 
-	newBalance, err := a.Balance.Add(&amount)
+	newBalance, err := a.Balance.Add(&c.Amount)
 	if err != nil {
-		return event.MoneyReceived{}, fmt.Errorf("cannot receive money from %s to %s: %v", from, a.Number, err)
+		return nil, fmt.Errorf("cannot receive money from %s to %s: %v", c.From, a.Number, err)
 	}
 
-	a.Balance = *newBalance
+	return []domain.DomainEvent{event.NewMoneyReceived(a.AggregateID(), c.From, c.To, c.Amount, *newBalance)}, nil
+}
 
-	return event.MoneyReceived{
-		From:    string(from),
-		To:      string(a.Number),
-		Amount:  amount,
-		Balance: *newBalance,
-	}, nil
+func (a *Account) OnAccountOpened(e event.AccountOpened) {
+	a.Number = Number(e.Number)
+	a.Balance = e.Balance
+}
+
+func (a *Account) OnMoneyDeposited(e event.MoneyDeposited) {
+	a.Balance = e.Balance
+	//  _ledgers.Add(new CreditMutation(cashDepositedEvent.Amount, new AccountNumber(string.Empty)));
+}
+
+func (a *Account) OnMoneyTransfered(e event.MoneyTransferred) {
+	//_ledgers.Add(new CreditTransfer(moneyTransferSendEvent.Amount, new AccountNumber(moneyTransferSendEvent.TargetAccount)));
+	a.Balance = e.Balance
+}
+
+func (a *Account) OnMoneyReceived(e event.MoneyReceived) {
+	//_ledgers.Add(new DebitTransfer(moneyTransferReceivedEvent.Amount, new AccountNumber(moneyTransferReceivedEvent.TargetAccount)));
+	a.Balance = e.Balance
 }
 
 func (a *Account) ensureAccountsAreDifferent(from Number, to Number) error {

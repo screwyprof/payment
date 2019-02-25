@@ -1,17 +1,22 @@
 package command
 
 import (
+	"github.com/google/uuid"
 	"github.com/rhymond/go-money"
-
-	"github.com/screwyprof/payment/pkg/domain/account"
 )
 
 type ReceiveMoney struct {
-	From   account.Number
-	To     account.Number
+	AggID uuid.UUID
+
+	From   string
+	To     string
 	Amount money.Money
 }
 
-func (r ReceiveMoney) CommandID() string {
-	return "ReceiveMoney"
+func (c ReceiveMoney) AggregateID() uuid.UUID {
+	return c.AggID
+}
+
+func (c ReceiveMoney) AggregateType() string {
+	return "account.Account"
 }

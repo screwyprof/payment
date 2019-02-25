@@ -6,20 +6,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
 
+	"github.com/screwyprof/payment/pkg/domain"
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
 )
 
 // ShowAccount Retrieves account info.
 type ShowAccount struct {
-	queryBus cqrs.QueryHandler
+	queryBus domain.QueryHandler
 }
 
 // NewShowAccount Creates a new instance of ShowAccount.
-func NewShowAccount(queryBus cqrs.QueryHandler) *ShowAccount {
+func NewShowAccount(queryBus domain.QueryHandler) *ShowAccount {
 	return &ShowAccount{queryBus: queryBus}
 }
 
