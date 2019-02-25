@@ -25,6 +25,7 @@ func (h *AccountOpened) Handle(e observer.Event) {
 
 	//fmt.Printf("AccountOpenedEventHandler: %s = %s\n", evn.Number, evn.Balance.Display())
 	rep := &report.Account{
+		ID:      evn.AggID,
 		Number:  string(evn.Number),
 		Balance: evn.Balance,
 		Ledgers: []report.Ledger{

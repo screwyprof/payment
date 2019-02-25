@@ -1,15 +1,21 @@
 package command
 
 import (
+	"github.com/google/uuid"
 	"github.com/rhymond/go-money"
-	"github.com/screwyprof/payment/pkg/domain/account"
 )
 
 type OpenAccount struct {
-	Number  account.Number
+	AggID uuid.UUID
+
 	Balance money.Money
+	Number  string
 }
 
-func (r OpenAccount) CommandID() string {
-	return "OpenAccount"
+func (c OpenAccount) AggregateID() uuid.UUID {
+	return c.AggID
+}
+
+func (c OpenAccount) AggregateType() string {
+	return "account.Account"
 }

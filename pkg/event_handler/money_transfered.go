@@ -27,6 +27,7 @@ func (h *MoneyTransferred) Handle(e observer.Event) {
 	//	evn.From, evn.Balance.Display(), evn.Amount.Display(), evn.To)
 
 	rep := &report.Account{
+		ID:      evn.AggID,
 		Number:  evn.From,
 		Balance: evn.Balance,
 		Ledgers: []report.Ledger{

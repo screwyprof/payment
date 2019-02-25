@@ -3,31 +3,30 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/screwyprof/payment/pkg/report"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rhymond/go-money"
 
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
-
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/request"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"
 
 	"github.com/screwyprof/payment/pkg/command"
-	"github.com/screwyprof/payment/pkg/domain/account"
+	"github.com/screwyprof/payment/pkg/domain"
 )
 
 // TransferMoney Tansfers money from one account to another.
 type TransferMoney struct {
-	commandBus cqrs.CommandHandler
-	queryBus   cqrs.QueryHandler
+	commandBus domain.CommandHandler
+	idByNumber report.IDByNumber
 }
 
 // NewTransferMoney Creates a new instance of TransferMoney.
-func NewTransferMoney(commandBus cqrs.CommandHandler, queryBus cqrs.QueryHandler) *TransferMoney {
+func NewTransferMoney(commandBus domain.CommandHandler, idByNumber report.IDByNumber) *TransferMoney {
 	return &TransferMoney{
 		commandBus: commandBus,
-		queryBus:   queryBus,
+		idByNumber: idByNumber,
 	}
 }
 
@@ -59,9 +58,15 @@ func (h *TransferMoney) Handle(ctx *gin.Context) {
 
 	amount := *money.New(req.Amount, req.Currency)
 
-	err := h.commandBus.Handle(context.Background(), command.TransferMoney{
-		From:   account.Number(from),
-		To:     account.Number(req.To),
+	fromAccID, err := h.idByNumber.IDByNumber(req.From)
+	if err != nil {
+		response.NewError(ctx, http.StatusInternalServerError, err)
+	}
+
+	err = h.commandBus.Handle(context.Background(), command.TransferMoney{
+		AggID:  fromAccID,
+		From:   req.From,
+		To:     req.To,
 		Amount: amount,
 	})
 	if err != nil {
@@ -69,9 +74,15 @@ func (h *TransferMoney) Handle(ctx *gin.Context) {
 		return
 	}
 
+	toAccID, err := h.idByNumber.IDByNumber(req.To)
+	if err != nil {
+		response.NewError(ctx, http.StatusInternalServerError, err)
+	}
+
 	err = h.commandBus.Handle(context.Background(), command.ReceiveMoney{
-		From:   account.Number(from),
-		To:     account.Number(req.To),
+		AggID:  toAccID,
+		From:   req.From,
+		To:     req.To,
 		Amount: amount,
 	})
 	if err != nil {

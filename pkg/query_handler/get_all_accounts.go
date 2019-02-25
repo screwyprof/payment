@@ -3,7 +3,7 @@ package query_handler
 import (
 	"context"
 	"fmt"
-	"github.com/screwyprof/payment/internal/pkg/cqrs"
+	"github.com/screwyprof/payment/pkg/domain"
 
 	"github.com/screwyprof/payment/pkg/query"
 	"github.com/screwyprof/payment/pkg/report"
@@ -13,11 +13,11 @@ type getAllAccountsInfo struct {
 	accountProvider report.GetAllAccounts
 }
 
-func NewGetAllAccounts(accountProvider report.GetAllAccounts) cqrs.QueryHandler {
+func NewGetAllAccounts(accountProvider report.GetAllAccounts) domain.QueryHandler {
 	return &getAllAccountsInfo{accountProvider: accountProvider}
 }
 
-func (intr *getAllAccountsInfo) Handle(ctx context.Context, q cqrs.Query, result interface{}) error {
+func (intr *getAllAccountsInfo) Handle(ctx context.Context, q domain.Query, result interface{}) error {
 	_, ok := q.(query.GetAllAccounts)
 	if !ok {
 		return fmt.Errorf("invalid query %+#v given", q)

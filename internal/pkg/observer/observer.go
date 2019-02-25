@@ -1,8 +1,10 @@
 package observer
 
+import "github.com/google/uuid"
+
 // Event defines an indication of a point-in-time occurrence.
 type Event interface {
-	EventID() string
+	EventID() uuid.UUID
 }
 
 // EventHandler defines a standard interface for instances that wish to list for
