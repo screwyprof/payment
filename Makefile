@@ -17,22 +17,22 @@ install:
 ## deps             : fetch dependencies
 deps:
 	@echo "--> Running dep"
-	GO111MODULE=on go mod download
+	go mod download
 
-## unit-test        : run unit tests
+## unit-test        : run unißt tests
 unit-test:
 	@echo "--> Running unit tests"
-	GOCACHE=off go test -v $(PACKAGES)
+	go test -v $(PACKAGES)
 
 ## unit-test-race   : run unit tests with -race flag
 unit-test-race:
 	@echo "--> Running go test --race"
-	GOCACHE=off go test -v -race $(PACKAGES)
+	go test -v -race $(PACKAGES)
 
 ## integration-test : run integration tests
 integration-test:
 	@echo "--> Running unit tests"
-	GOCACHE=off go test -race -v ./test/...
+	go test -race -v ./test/...
 
 ## fmt              : format go files
 fmt:
