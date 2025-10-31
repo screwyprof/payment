@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 
 	"github.com/screwyprof/payment/pkg/command"
 	"github.com/screwyprof/payment/pkg/domain"

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/request"
 	"github.com/screwyprof/payment/internal/pkg/delivery/gin/response"

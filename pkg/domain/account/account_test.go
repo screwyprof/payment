@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -92,7 +92,7 @@ func TestAccountDeposit_AmountInADifferentCurrencyGiven_ErrorReturned(t *testing
 	_, err := acc.DepositMoney(command.DepositMoney{Amount: *money.New(10000, "RUB")})
 
 	// assert
-	assert.EqualError(t, err, "cannot deposit account 123: Currencies don't match")
+	assert.EqualError(t, err, "cannot deposit account 123: currencies don't match")
 }
 
 func TestAccountTransferMoney_ValidParamsGiven_ValidEventReturned(t *testing.T) {
@@ -172,7 +172,7 @@ func TestAccountTransferMoney_AmountInADifferentCurrentGiven_ErrorReturned(t *te
 	_, err := acc.TransferMoney(command.TransferMoney{From: "123", To: "777", Amount: *money.New(1000, "RUB")})
 
 	// assert
-	assert.EqualError(t, err, "cannot send transfer from 123 to 777: Currencies don't match")
+	assert.EqualError(t, err, "cannot send transfer from 123 to 777: currencies don't match")
 }
 
 func TestAccountReceiveMoney_SendingTransferToTheSameAccount_ErrorReturned(t *testing.T) {
@@ -202,7 +202,7 @@ func TestAccountReceiveMoney_AmountInADifferentCurrencyGiven_ErrorReturned(t *te
 	_, err := acc.ReceiveMoney(command.ReceiveMoney{From: "777", Amount: *money.New(1000, "RUB")})
 
 	// assert
-	assert.EqualError(t, err, "cannot receive money from 777 to 123: Currencies don't match")
+	assert.EqualError(t, err, "cannot receive money from 777 to 123: currencies don't match")
 }
 
 func TestAccountReceiveMoney_ValidParamsGiven_ValidEventReturned(t *testing.T) {

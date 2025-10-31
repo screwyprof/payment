@@ -3,7 +3,7 @@ package report
 import (
 	"testing"
 
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 
 	qdaptor "github.com/screwyprof/payment/internal/pkg/adaptor/query_handler"
 	"github.com/screwyprof/payment/internal/pkg/bus"

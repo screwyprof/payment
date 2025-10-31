@@ -2,7 +2,7 @@ package report
 
 import (
 	"fmt"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 )
 
 type Ledger struct {

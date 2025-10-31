@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 )
 
 // Account An Account representation.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

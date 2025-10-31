@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/google/uuid"
-	"github.com/rhymond/go-money"
+	"github.com/Rhymond/go-money"
 )
 
 type DepositMoney struct {
