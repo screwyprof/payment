@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/go:1.19
+      - image: cimg/go:1.24
     working_directory: ~/go/src/github.com/screwyprof/payment
     steps:
       - checkout
